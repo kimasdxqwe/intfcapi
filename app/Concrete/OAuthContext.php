@@ -21,13 +21,15 @@ class OAuthContext
     }
 
     public function resolveAccessToken(
+        AccessToken $accessToken,
         int $scopeFlag,
         $scopes = [],
-        AccessToken $accessToken
     ): void {
+
+        $this->accessToken = $accessToken;
         $this->scopeFlag = $scopeFlag;
         $this->scopes = $scopes;
-        $this->accessToken = $accessToken;
+
         $this->resolved = $accessToken instanceof AccessToken;
     }
 }

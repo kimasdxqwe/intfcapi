@@ -20,7 +20,7 @@ class CheckToken extends ValidateToken
 
             //$requestInterface->debug('CheckToken Before');
 
-            $requestInterface->oAuthContext->resolveAccessToken(1, $params, $token);
+            $requestInterface->oAuthContext->resolveAccessToken($token, 1, $params);
 
             _debug([
                 'Token' => $requestInterface->oAuthContext->accessToken
