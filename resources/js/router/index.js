@@ -3,6 +3,7 @@ import Home from '@/pages/Home.vue'
 import About from '@/pages/About.vue'
 import Contact from '@/pages/Contact.vue'
 import Dashboard from '@/pages/Dashboard.vue'
+import NotFound from "@/pages/NotFound.vue";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -11,6 +12,8 @@ const router = createRouter({
         { path: '/about', name: 'about', component: About, meta: { title: 'About' } },
         { path: '/contact', name: 'contact', component: Contact, meta: { title: 'Contact' } },
         { path: '/dashboard', name: 'dashboard', component: Dashboard, meta: { title: 'Dashboard' } },
+
+        { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound, meta: { title: 'Not found' } },
     ],
 })
 
