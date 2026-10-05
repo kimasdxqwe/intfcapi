@@ -1,6 +1,9 @@
 @import 'tailwindcss';
 @import "@fontsource-variable/hanken-grotesk";
 
+@source '../**/*.blade.php';
+@source '../**/*.js';
+@source '../**/*.vue';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
