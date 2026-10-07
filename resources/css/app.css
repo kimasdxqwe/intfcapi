@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import "@fontsource-variable/hanken-grotesk";
+@import "@fontsource-variable/reddit-sans-condensed";
 
 @source '../**/*.blade.php';
 @source '../**/*.js';
@@ -9,5 +10,9 @@
 
 @theme {
     --font-sans: "Hanken Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
+    --font-label: "Reddit Sans Condensed Variable", ui-sans-serif, system-ui, sans-serif;
 }
 
+html {
+    scroll-behavior: smooth;
+}
