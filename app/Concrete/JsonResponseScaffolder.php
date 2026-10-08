@@ -88,7 +88,8 @@ class JsonResponseScaffolder
             $code == Response::HTTP_SERVICE_UNAVAILABLE => $this->serviceUnavailableResponse(),
             $code == Response::HTTP_NOT_FOUND => $this->notFoundResponse(),
             $code == Response::HTTP_FORBIDDEN => $this->forbiddenResponse(),
-            $code == Response::HTTP_TOO_MANY_REQUESTS => $this->tooManyRequestsResponse()
+            $code == Response::HTTP_TOO_MANY_REQUESTS => $this->tooManyRequestsResponse(),
+            $code == 419 => $this->unauthorizedResponse(),
         };
     }
 }
