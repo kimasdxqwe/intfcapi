@@ -14,16 +14,6 @@ class DebugController extends Controller
         {
             $requestInterface = app(RequestInterface::class);
 
-            //$requestInterface->debug('DebugController');
-
-            $requestIsFromApiEndpoint = $request->is('api/*');
-            $requestAcceptsJson = $request->expectsJson();
-
-            _debug([
-                'Request is from api endpoint' => $requestIsFromApiEndpoint,
-                'Request accept json' => $requestAcceptsJson,
-            ]);
-
             return ResponseJson::successfulResponse([
                 'RequestConcrete oauth' => [
                     'resolved' => $requestInterface->oAuthContext->resolved,

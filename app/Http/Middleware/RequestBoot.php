@@ -16,16 +16,9 @@ class RequestBoot
      */
     public function handle(Request $request, Closure $next): Response
     {
-//        _debug('RequestBoot');
+        $debugEnabled = false;
 
         $setRefreshTokenIntoTheRequestForm = $request->hasCookie('refresh_token') && !$request->has('refresh_token');
-
-        _debug([
-            'has refresh_token cookie' => $request->hasCookie('refresh_token'),
-            'request has refresh_token' => $request->has('refresh_token'),
-            'set refresh_token' => $setRefreshTokenIntoTheRequestForm,
-            'refresh_token' => $request->cookie('refresh_token'),
-        ]);
 
         if($setRefreshTokenIntoTheRequestForm){
 
@@ -45,13 +38,17 @@ class RequestBoot
 
         $requestInterface = app(RequestInterface::class);
 
-//        $requestInterface->debug('RequestBoot Before');
+        if($debugEnabled){
+            $requestInterface->debug('RequestBoot Before');
+        }
 
         $requestInterface->payload = $requestPayload;
         $requestInterface->filters = $requestFilters;
         $requestInterface->orders = $requestOrders;
 
-//        $requestInterface->debug('RequestBoot After');
+        if($debugEnabled){
+            $requestInterface->debug('RequestBoot After');
+        }
 
         return $next($request);
     }

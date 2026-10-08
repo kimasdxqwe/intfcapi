@@ -15,8 +15,6 @@ class EnsureClientIsCustomOwner extends ValidateToken
      */
     protected function validate(ScopeAuthorizable $token, string ...$params): void
     {
-        _debug('EnsureClientIsCustomOwner');
-
         if (
             $token instanceof AccessToken
             && ! is_null($token->oauth_user_id)

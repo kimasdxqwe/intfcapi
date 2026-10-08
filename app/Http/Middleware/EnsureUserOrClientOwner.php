@@ -17,20 +17,22 @@ class EnsureUserOrClientOwner
      */
     public function handle(Request $request, Closure $next): Response
     {
-        _debug('EnsureUserOrClientOwner');
+        $debugEnabled = false;
 
-        _debug('attempt Auth:api');
+        if($debugEnabled){
+            _debug('attempt Auth:api');
+        }
 
-        // Try user-scoped auth first (authorization code / PKCE tokens)
+        // Try user-scoped auth (authorization code / PKCE tokens)
         if (Auth::guard('api')->check()) {
             return $next($request);
         }
 
-        _debug('Auth:api failed... now checking client credentials.');
+        if($debugEnabled){
+            _debug('Auth:api failed... now checking client credentials.');
+        }
 
         // Fall back to client-credentials / resource-owner check.
-        // Delegate to the existing middleware's own handle() logic so
-        // you don't duplicate its internals here.
         return app(EnsureClientIsCustomOwner::class)->handle($request, $next);
     }
 }

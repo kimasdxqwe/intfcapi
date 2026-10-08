@@ -12,13 +12,19 @@ class CheckToken extends ValidateToken
 {
     protected function validate(ScopeAuthorizable $token, string ...$params): void
     {
-        _debug('CheckToken');
+        $debugEnabled = false;
+
+        if($debugEnabled){
+            _debug('CheckToken');
+        }
 
         $requestInterface = app(RequestInterface::class);
 
         if($token instanceof AccessToken){
 
-            //$requestInterface->debug('CheckToken Before');
+            if($debugEnabled){
+                $requestInterface->debug('CheckToken Before');
+            }
 
             $requestInterface->oAuthContext->resolveAccessToken($token, 1, $params);
 
@@ -26,7 +32,9 @@ class CheckToken extends ValidateToken
                 'Token' => $requestInterface->oAuthContext->accessToken
             ]);
 
-            //$requestInterface->debug('CheckToken After');
+            if($debugEnabled){
+                $requestInterface->debug('CheckToken After');
+            }
         }
 
         foreach ($params as $scope) {
