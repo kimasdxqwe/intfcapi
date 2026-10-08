@@ -1,60 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Authorize {{ $client->name }}</title>
+    @vite(['resources/css/app.css'])
+
     <style>
-        :root {
-            color-scheme: light dark;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: #f4f4f5;
-            color: #18181b;
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-        }
-        .card {
-            background: #ffffff;
-            border: 1px solid #e4e4e7;
-            border-radius: 12px;
-            max-width: 420px;
-            width: 100%;
-            padding: 32px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-        }
-        .app-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 10px;
-            background: #6366f1;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 18px;
-            margin-bottom: 16px;
-        }
-        h1 {
-            font-size: 18px;
-            font-weight: 600;
-            margin: 0 0 4px;
-            line-height: 1.4;
-        }
-        h1 span {
-            color: #4f46e5;
-        }
-        .subtitle {
-            font-size: 14px;
-            color: #71717a;
-            margin: 0 0 20px;
-        }
         .scopes {
             background: #fafafa;
             border: 1px solid #e4e4e7;
@@ -94,62 +46,18 @@
             color: #71717a;
             margin: 0;
         }
-        .actions {
-            display: flex;
-            gap: 12px;
-        }
-        button {
-            flex: 1;
-            font-size: 14px;
-            font-weight: 600;
-            padding: 10px 16px;
-            border-radius: 8px;
-            border: 1px solid transparent;
-            cursor: pointer;
-        }
-        .approve {
-            background: #4f46e5;
-            color: #fff;
-        }
-        .approve:hover {
-            background: #4338ca;
-        }
-        .deny {
-            background: #fff;
-            color: #3f3f46;
-            border-color: #d4d4d8;
-        }
-        .deny:hover {
-            background: #f4f4f5;
-        }
-        .footer {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #a1a1aa;
-            text-align: center;
-        }
-        @media (prefers-color-scheme: dark) {
-            body { background: #09090b; color: #fafafa; }
-            .card { background: #18181b; border-color: #27272a; }
-            .subtitle { color: #a1a1aa; }
-            .scopes { background: #1f1f23; border-color: #27272a; }
-            .scopes p { color: #a1a1aa; }
-            .scopes li { color: #d4d4d8; }
-            .no-scopes { color: #a1a1aa; }
-            .deny { background: transparent; color: #e4e4e7; border-color: #3f3f46; }
-            .deny:hover { background: #27272a; }
-            .footer { color: #52525b; }
-        }
     </style>
 </head>
-<body>
-    <div class="card">
-        <div class="app-icon">{{ strtoupper(substr($client->name, 0, 1)) }}</div>
-
-        <h1><span>{{ $client->name }}</span> is requesting access to your account</h1>
-        <p class="subtitle">
-            Signed in as {{ $user->email ?? $user->name ?? 'your account' }}
-        </p>
+<body class="flex min-h-screen items-center justify-center bg-gray-100 px-4">
+    <div class="w-full max-w-md rounded bg-white border-gray-300 p-6 shadow">
+        <div class="mb-6 space-y-4">
+            <h1>
+                <span class="text-xl font-semibold text-gray-900">{{ $client->name }}</span> is requesting access to your account
+            </h1>
+            <p class="text-sm text-gray-500">
+                Signed in as {{ $user->email ?? $user->name ?? 'your account' }}
+            </p>
+        </div>
 
         <div class="scopes">
             <p>This will allow the application to</p>
@@ -170,14 +78,20 @@
             <input type="hidden" name="client_id" value="{{ $client->id }}">
             <input type="hidden" name="auth_token" value="{{ $authToken }}">
 
-            <div class="actions">
+            <div class="flex gap-2">
                 <form method="post" action="{{ url('/oauth/authorize') }}">
                     @csrf
                     @method('DELETE')
                     <input type="hidden" name="state" value="{{ $request->state }}">
                     <input type="hidden" name="client_id" value="{{ $client->id }}">
                     <input type="hidden" name="auth_token" value="{{ $authToken }}">
-                    <button type="submit" class="deny">Deny</button>
+
+                    <button
+                        type="submit"
+                        class="flex-1 cursor-pointer rounded border border-gray-300 bg-white px-3 py-1 font-label text-gray-700 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:border-slate-500 focus:ring-slate-300">
+                        Deny
+                    </button>
+
                 </form>
 
                 <form method="post" action="{{ url('/oauth/authorize') }}">
@@ -185,12 +99,17 @@
                     <input type="hidden" name="state" value="{{ $request->state }}">
                     <input type="hidden" name="client_id" value="{{ $client->id }}">
                     <input type="hidden" name="auth_token" value="{{ $authToken }}">
-                    <button type="submit" class="approve">Approve</button>
+
+                    <button
+                        type="submit"
+                        class="cursor-pointer rounded border border-gray-300 bg-gray-700 px-3 py-1 font-label text-white text-shadow-md hover:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:border-slate-500 focus:ring-slate-300">
+                        Approve
+                    </button>
                 </form>
             </div>
         </form>
 
-        <p class="footer">
+        <p class="mt-4 text-sm text-gray-500">
             You can revoke access at any time from your account settings.
         </p>
     </div>
