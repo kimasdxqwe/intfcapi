@@ -23,6 +23,7 @@ use Symfony\Component\HttpFoundation\Exception\SuspiciousOperationException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -73,15 +74,34 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->render(function(Throwable $throwable){
 
-            _debug([
-                ('thrown') => get_class($throwable),
-                'Exception instance?' => ($throwable instanceof Exception ? 'TRUE' : 'FALSE'),
-                'Error instance?' => ($throwable instanceof Error ? 'TRUE' : 'FALSE'),
-                'message' => $throwable->getMessage(),
-                'file' => $throwable->getFile(),
-                'line' => $throwable->getLine(),
-                'request' => RequestFacade::url(),
-            ]);
+            $csrfTokenMismatch = false;
+            $serviceUnavailable = false;
+
+            $thrownIsHttpExceptionInterface = $throwable instanceof HttpExceptionInterface && is_callable([$throwable, 'getStatusCode']);
+
+            if($thrownIsHttpExceptionInterface) {
+
+                $csrfTokenMismatch = $throwable->getStatusCode() == 419;
+                $serviceUnavailable = $throwable->getStatusCode() == 503;
+            }
+
+            if(!app()->environment('production', 'prod')) {
+
+                _debug([
+                    ('thrown') => get_class($throwable),
+                    'Exception instance?' => ($throwable instanceof Exception ? 'TRUE' : 'FALSE'),
+                    'Error instance?' => ($throwable instanceof Error ? 'TRUE' : 'FALSE'),
+                    'thrown is HttpExceptionInterface' => $thrownIsHttpExceptionInterface,
+                    'CSRF token mismatch?' => $csrfTokenMismatch,
+                    'Service unavailable?' => $serviceUnavailable,
+                    'HttpException status code' => $thrownIsHttpExceptionInterface ? $throwable->getStatusCode() : null,
+                    'message' => $throwable->getMessage(),
+                    'file' => $throwable->getFile(),
+                    'line' => $throwable->getLine(),
+                    'request' => RequestFacade::url(),
+                    'expects json' => RequestFacade::expectsJson()
+                ]);
+            }
 
             $logExempt = _is_instance_of_any($throwable, [
                 AccessDeniedHttpException::class,
@@ -98,10 +118,15 @@ return Application::configure(basePath: dirname(__DIR__))
                     ('thrown') => get_class($throwable),
                     'Exception instance?' => ($throwable instanceof Exception ? 'TRUE' : 'FALSE'),
                     'Error instance?' => ($throwable instanceof Error ? 'TRUE' : 'FALSE'),
+                    'thrown is HttpExceptionInterface' => $thrownIsHttpExceptionInterface,
+                    'CSRF token mismatch?' => $csrfTokenMismatch,
+                    'Service unavailable?' => $serviceUnavailable,
+                    'HttpException status code' => $thrownIsHttpExceptionInterface ? $throwable->getStatusCode() : null,
                     'message' => $throwable->getMessage(),
                     'file' => $throwable->getFile(),
                     'line' => $throwable->getLine(),
                     'request' => RequestFacade::url(),
+                    'expects json' => RequestFacade::expectsJson()
                 ]);
             }
 
@@ -126,7 +151,9 @@ return Application::configure(basePath: dirname(__DIR__))
                     $throwable instanceof AuthorizationException && !$throwable->hasStatus() => ResponseJson::responseByCode(Response::HTTP_FORBIDDEN),
                     $throwable instanceof SuspiciousOperationException => ResponseJson::notFoundResponse('Bad hostname provided.'),
                     $throwable instanceof TokenMismatchException => ResponseJson::notAcceptableResponse(),
-                    $throwable instanceof AuthenticationException => ResponseJson::unauthorizedResponse($throwable->getMessage()),
+                    ($throwable instanceof HttpExceptionInterface && $serviceUnavailable) => ResponseJson::serviceUnavailableResponse($throwable->getMessage()),
+                    $throwable instanceof AuthenticationException,
+                    ($throwable instanceof HttpExceptionInterface && $csrfTokenMismatch) => ResponseJson::unauthorizedResponse($throwable->getMessage()),
                     $throwable instanceof ValidationException => ResponseJson::validationErrorResponse($throwable->errors(), $throwable->getMessage()),
                     $throwable instanceof ThrottleRequestsException => ResponseJson::tooManyRequestsResponse(),
                     $throwable instanceof MethodNotAllowedHttpException => ResponseJson::methodNotAllowedResponse(),
