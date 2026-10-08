@@ -13,6 +13,15 @@ class AuthenticationController extends Controller
      */
     public function index(Request $request)
     {
+        $redirect = $request->query('redirect');
+
+        if (is_string($redirect)
+            && str_starts_with($redirect, '/')
+            && ! str_starts_with($redirect, '//')
+            && ! str_contains($redirect, '\\')) {
+            $request->session()->put('url.intended', url($redirect));
+        }
+
         return view('auth.login');
     }
 
@@ -29,17 +38,12 @@ class AuthenticationController extends Controller
         $remember = $request->boolean('remember');
 
         if (! Auth::attempt($credentials, $remember)) {
-            throw ValidationException::withMessages([
-                'email' => 'These credentials do not match our records.',
-            ]);
-        }
 
-        _debug([
-            'login' => [
-                'email' => $credentials['email'],
-                'password' => $credentials['password'],
-            ]
-        ]);
+            return back()
+                ->withErrors(['email' => 'These credentials do not match our records.'])
+                ->withFragment('login-section')
+                ->onlyInput('email');
+        }
 
         $request->session()->regenerate();
 
@@ -59,6 +63,10 @@ class AuthenticationController extends Controller
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        if ($request->expectsJson()) {
+            return response()->noContent();
+        }
 
         return redirect('/login');
     }
