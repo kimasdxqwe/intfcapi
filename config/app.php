@@ -123,4 +123,8 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'auth_prefill' => [
+        'email' => env('PREFILL_AUTH_EMAIL'),
+        'password' => env('PREFILL_AUTH_PASSWORD'),
+    ]
 ];
