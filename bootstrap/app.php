@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request as RequestFacade;;
 use Illuminate\Validation\ValidationException;
-use Laravel\Passport\Http\Middleware\EnsureClientIsResourceOwner;
 use Symfony\Component\HttpFoundation\Exception\SuspiciousOperationException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -46,6 +45,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'ensure_client_is_resource_owner' => \App\Http\Middleware\EnsureClientIsCustomOwner::class,
+
             //Custom Laravel\Passport\Http\Middleware\CheckToken
             'scopes' => \App\Http\Middleware\CheckTokens::class,
             //Custom Laravel\Passport\Http\Middleware\CheckTokenForAnyScope
