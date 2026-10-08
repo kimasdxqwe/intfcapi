@@ -26,7 +26,7 @@
                 value="{{ old('email', config('app.auth_prefill.email')) }}"
                 required
                 autocomplete="email"
-                class="w-full rounded-sm border px-3 py-2 text-gray-900 shadow-sm focus:outline-none focus:ring-2
+                class="w-full rounded-sm border px-3 py-1 text-gray-900 shadow-sm focus:outline-none focus:ring-2
                            {{ $errors->has('email')
                                ? 'border-red-500 focus:ring-red-200'
                                : 'border-gray-300 focus:border-slate-500 focus:ring-slate-300' }}"
@@ -45,7 +45,7 @@
                 required
                 autocomplete="current-password"
                 value="{{ config('app.auth_prefill.password') }}"
-                class="w-full rounded-sm border px-3 py-2 text-gray-900 shadow-sm focus:outline-none focus:ring-2
+                class="w-full rounded-sm border px-3 py-1 text-gray-900 shadow-sm focus:outline-none focus:ring-2
                            {{ $errors->has('password')
                                ? 'border-red-500 focus:ring-red-200'
                                : 'border-gray-300 focus:border-slate-500 focus:ring-slate-300' }}"

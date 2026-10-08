@@ -9,7 +9,7 @@
                     ref="nameInput"
                     v-model="form.name"
                     type="text"
-                    class="w-full rounded border border-gray-300 px-3 py-2 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                    class="w-full rounded border border-gray-300 px-3 py-1 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-300"
                 />
             </div>
 
@@ -19,7 +19,7 @@
                     id="email"
                     v-model="form.email"
                     type="email"
-                    class="w-full rounded border border-gray-300 px-3 py-2 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                    class="w-full rounded border border-gray-300 px-3 py-1 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-300"
                 />
             </div>
         </div>
