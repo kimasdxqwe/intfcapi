@@ -2,7 +2,6 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Laravel\Passport\Http\Middleware\EnsureClientIsResourceOwner;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -10,8 +9,6 @@ Route::get('/user', function (Request $request) {
 
 Route::group([
     'middleware' => [
-//        EnsureClientIsResourceOwner::class
-//        'ensure_client_is_resource_owner',
         'ensure_user_or_client'
     ],
     'prefix' => 'v1'
