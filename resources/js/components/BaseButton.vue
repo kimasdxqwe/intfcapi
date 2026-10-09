@@ -27,7 +27,7 @@ defineExpose({
 });
 
 const base =
-    'cursor-pointer rounded border border-gray-300 px-3 py-1 font-label ' +
+    'cursor-pointer rounded border border-gray-300 px-3 py-1 font-data ' +
     'disabled:cursor-not-allowed disabled:opacity-50 ' +
     'focus:outline-none focus:ring-2 focus:border-slate-500 focus:ring-slate-300';
 

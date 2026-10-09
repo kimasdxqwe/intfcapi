@@ -88,7 +88,7 @@
 
                     <button
                         type="submit"
-                        class="flex-1 cursor-pointer rounded border border-gray-300 bg-white px-3 py-1 font-label text-gray-700 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:border-slate-500 focus:ring-slate-300">
+                        class="flex-1 cursor-pointer rounded border border-gray-300 bg-white px-3 py-1 font-data text-gray-700 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:border-slate-500 focus:ring-slate-300">
                         Deny
                     </button>
 
@@ -102,7 +102,7 @@
 
                     <button
                         type="submit"
-                        class="cursor-pointer rounded border border-gray-300 bg-gray-700 px-3 py-1 font-label text-white text-shadow-md hover:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:border-slate-500 focus:ring-slate-300">
+                        class="cursor-pointer rounded border border-gray-300 bg-gray-700 px-3 py-1 font-data text-white text-shadow-md hover:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:border-slate-500 focus:ring-slate-300">
                         Approve
                     </button>
                 </form>
