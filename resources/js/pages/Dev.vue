@@ -59,8 +59,10 @@
             <div class="flex-1 flex flex-col gap-2">
                 <div>
                     <div class="text-sm text-gray-700">Restricted range & dates, week starts Monday</div>
-                    <BaseDatePicker class="self-start" v-model="birthday" min="2026-10-01" max="2026-12-31" :week-start="1" :disabled-dates="restricted" :disabled-weekdays="[0, 6]" disabled-color="red" inline />
+                    <BaseDatePicker class="self-start" v-model="birthday" :week-start="1"
+                                    min="2026-10-01" max="2026-12-31" :disabled-dates="restricted" :disabled-weekdays="[0, 6]" disabled-color="red" :inline="toggleDatePicker2Inline" />
                 </div>
+                <BaseCheckbox v-model="toggleDatePicker2Inline" class="border border-dashed border-slate-300" label="Toggle inline" />
                 <div class="p-2 border border-dashed border-slate-300 text-sm text-gray-700">{{birthday}}</div>
             </div>
 
@@ -85,8 +87,9 @@
             <div class="flex-1 flex flex-col gap-2">
                 <div>
                     <div class="text-sm text-gray-700">Longer history, no future years</div>
-                    <BaseDatePicker class="self-start" v-model="historyAppointment" mode="datetime" :years-before="120" :years-after="0" max="2026-12-31" inline />
+                    <BaseDatePicker class="self-start" v-model="historyAppointment" mode="datetime" :years-before="120" :years-after="0" max="2026-12-31" :inline="toggleDatePicker5Inline" />
                 </div>
+                <BaseCheckbox v-model="toggleDatePicker5Inline" class="border border-dashed border-slate-300" label="Toggle inline" />
                 <div class="p-2 border border-dashed border-slate-300 text-sm text-gray-700">{{historyAppointment}}</div>
             </div>
 
@@ -161,6 +164,7 @@ import {onMounted, ref } from "vue";
 import BaseCheckBoxGroup from "@/components/BaseCheckBoxGroup.vue";
 import BaseRadioGroup from "@/components/BaseRadioGroup.vue";
 import BaseDatePicker from "@/components/BaseDatePicker.vue";
+import BaseCheckbox from "@/components/BaseCheckbox.vue";
 
 const { isProduction } = useEnv();
 const metaEnv = import.meta.env;
@@ -267,6 +271,9 @@ const tagOptions = [
 const errors = ref({
     'birthday': 'Birthday error'
 });
+
+const toggleDatePicker2Inline = ref(false);
+const toggleDatePicker5Inline = ref(false);
 
 const birthday = ref(null);                 // '2026-10-09'
 const restricted = [

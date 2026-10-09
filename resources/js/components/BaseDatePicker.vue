@@ -393,6 +393,7 @@ function syncViewTo(day) {
 
 function pickToday() {
     if (isOutOfRange(todayIso)) return;
+
     const now = new Date();
     emit(
         'update:modelValue',
@@ -403,7 +404,11 @@ function pickToday() {
             s: isDateTime.value ? now.getSeconds() : 0,
         })
     );
-    syncView();
+
+    // don't call syncView() here: the prop hasn't updated yet
+    viewYear.value = now.getFullYear();
+    viewMonth.value = now.getMonth();
+
     if (!isDateTime.value) close();
 }
 
