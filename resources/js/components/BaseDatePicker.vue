@@ -2,6 +2,7 @@
     <div ref="root" class="relative" @keydown="onKeydown">
         <!-- Trigger -->
         <div
+            v-if="!inline"
             role="combobox"
             aria-haspopup="dialog"
             :aria-expanded="open"
@@ -26,7 +27,7 @@
             </svg>
 
             <span v-if="displayText" class="min-w-0 flex-1 truncate text-gray-900 font-data">{{ displayText }}</span>
-            <span v-else class="min-w-0 flex-1 truncate text-gray-400">{{ effectivePlaceholder }}</span>
+            <span v-else class="min-w-0 flex-1 truncate text-gray-400 font-data">{{ effectivePlaceholder }}</span>
 
             <button
                 v-if="clearable && modelValue && !disabled"
@@ -45,13 +46,19 @@
 
         <!-- Dropdown -->
         <div
-            v-if="open"
-            role="dialog"
-            aria-label="Choose date"
-            class="absolute z-40 mt-1 w-72 rounded border border-gray-300 bg-white p-3 shadow-lg font-data"
+            v-if="isOpen"
+            :role="inline ? 'group' : 'dialog'"
+            aria-label="Select date"
+            class="font-data"
+            :class="[
+                'w-72 rounded border border-gray-300 bg-white p-3',
+                inline
+                    ? ['max-w-full', disabled ? 'pointer-events-none opacity-50' : '']
+                    : ['absolute z-40 mt-1 shadow-lg', align === 'right' ? 'right-0' : 'left-0'],
+            ]"
         >
             <!-- Month navigation -->
-            <div class="mb-2 flex items-center justify-between">
+            <div class="mb-2 flex items-center justify-between font-sans">
                 <button
                     type="button"
                     aria-label="Previous month"
@@ -100,28 +107,41 @@
 
             <!-- Days -->
             <div class="grid grid-cols-7 gap-y-0.5">
-                <button
-                    v-for="day in days"
-                    :key="day.iso"
-                    type="button"
-                    :disabled="day.disabled"
-                    :aria-label="day.iso"
-                    :aria-pressed="day.isSelected"
-                    :class="[
-                        'mx-auto flex size-8 items-center justify-center rounded text-sm',
-                        day.isSelected
-                            ? 'bg-slate-700 font-semibold text-white'
-                            : day.disabled
-                              ? 'cursor-not-allowed text-gray-300'
-                              : day.inMonth
-                                ? 'cursor-pointer text-gray-800 hover:bg-gray-100'
-                                : 'cursor-pointer text-gray-400 hover:bg-gray-100',
-                        day.isToday && !day.isSelected ? 'border border-slate-400' : '',
-                    ]"
-                    @click="pickDay(day)"
-                >
-                    {{ day.d }}
-                </button>
+                <div v-for="(day, i) in days" :key="day.iso" class="relative flex justify-center">
+                    <button
+                        type="button"
+                        :aria-disabled="day.disabled"
+                        :aria-label="day.label ? `${day.iso}, ${day.label}` : day.iso"
+                        :aria-pressed="day.isSelected"
+                        :class="[
+                            'flex size-8 items-center justify-center rounded text-sm focus:outline-none focus:ring-2 focus:ring-slate-300',
+                            day.isSelected
+                                ? 'cursor-pointer bg-slate-700 font-semibold text-white'
+                                : day.disabled
+                                  ? ['cursor-not-allowed', day.restricted ? restrictedClass : 'text-gray-300']
+                                  : day.inMonth
+                                    ? 'cursor-pointer text-gray-800 hover:bg-gray-100'
+                                    : 'cursor-pointer text-gray-400 hover:bg-gray-100',
+                                        day.isToday && !day.isSelected ? 'border border-slate-400' : '',
+                                    ]"
+                                    @click="pickDay(day)"
+                                >
+                                    {{ day.d }}
+                                </button>
+
+                                <!-- Balloon -->
+                                <div
+                                    v-if="balloon && balloon.iso === day.iso"
+                                    role="status"
+                                    :class="[
+                                        'absolute bottom-full z-50 mb-1.5 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white shadow-lg',
+                                        balloonPos(i).box,
+                                    ]"
+                                >
+                        {{ balloon.label }}
+                        <span :class="['absolute top-full -mt-1 size-2 rotate-45 bg-gray-900', balloonPos(i).arrow]"></span>
+                    </div>
+                </div>
             </div>
 
             <!-- Time (24-hour) -->
@@ -151,7 +171,7 @@
                 </button>
 
                 <button
-                    v-if="isDateTime"
+                    v-if="isDateTime && !inline"
                     type="button"
                     class="cursor-pointer rounded border border-gray-300 bg-gray-700 px-3 py-1 text-sm text-white hover:bg-gray-600"
                     @click="close"
@@ -164,8 +184,18 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { onClickOutside } from '@vueuse/core';
+
+const restrictedColors = {
+    gray: 'text-gray-300',
+    red: 'bg-red-50 text-red-400',
+    orange: 'bg-orange-50 text-orange-400',
+    amber: 'bg-amber-50 text-amber-500',
+    blue: 'bg-blue-50 text-blue-400',
+};
+
+const restrictedClass = computed(() => restrictedColors[props.disabledColor] ?? restrictedColors.gray);
 
 const props = defineProps({
     modelValue: { type: String, default: null },
@@ -181,6 +211,11 @@ const props = defineProps({
     secondStep: { type: Number, default: 1 },
     yearsBefore: { type: Number, default: 100 }, // years listed before the current year
     yearsAfter: { type: Number, default: 20 },   // years listed after the current year
+    disabledDates: { type: [Array, Function], default: () => [] }, // [{ date, label }] or (iso) => boolean | label string
+    disabledColor: { type: String, default: 'gray' },
+    align: { type: String, default: 'left', validator: (v) => ['left', 'right'].includes(v) },
+    disabledWeekdays: { type: Array, default: () => [] }, // 0 = Sunday ... 6 = Saturday
+    inline: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -260,9 +295,43 @@ const weekdays = computed(() => {
     );
 });
 
-function isOutOfRange(iso) {
-    return (props.min && iso < props.min) || (props.max && iso > props.max);
+// Map of date -> { label }. If a date is listed twice, the first entry wins.
+const disabledMap = computed(() => {
+    const map = new Map();
+    if (!Array.isArray(props.disabledDates)) return map;
+
+    for (const item of props.disabledDates) {
+        const isObject = item !== null && typeof item === 'object';
+        const date = isObject ? item.date : item;
+        if (!date || map.has(date)) continue;
+
+        const label = isObject && item.label != null ? String(item.label).trim() : '';
+        map.set(date, { label: label || null }); // missing, null and '' all become null
+    }
+    return map;
+});
+
+// returns null when the date isn't restricted, otherwise { label }
+function restriction(iso) {
+    if (disabledMap.value.has(iso)) return disabledMap.value.get(iso);
+
+    if (props.disabledWeekdays.length) {
+        const [y, m, d] = iso.split('-').map(Number);
+        if (props.disabledWeekdays.includes(new Date(y, m - 1, d).getDay())) {
+            return { label: null };
+        }
+    }
+
+    if (typeof props.disabledDates === 'function') {
+        const result = props.disabledDates(iso);
+        if (result) return { label: typeof result === 'string' && result.trim() ? result.trim() : null };
+    }
+    return null;
 }
+
+const isRangeBlocked = (iso) => (props.min && iso < props.min) || (props.max && iso > props.max);
+
+const isOutOfRange = (iso) => !!(isRangeBlocked(iso) || restriction(iso));
 
 const days = computed(() => {
     const first = new Date(viewYear.value, viewMonth.value, 1);
@@ -272,13 +341,17 @@ const days = computed(() => {
     return Array.from({ length: 42 }, (_, i) => {
         const date = new Date(viewYear.value, viewMonth.value, 1 - offset + i);
         const iso = toIsoDate(date.getFullYear(), date.getMonth(), date.getDate());
+        const rule = restriction(iso);
+
         return {
             iso,
             y: date.getFullYear(),
             m: date.getMonth(),
             d: date.getDate(),
             inMonth: date.getMonth() === viewMonth.value,
-            disabled: !!isOutOfRange(iso),
+            disabled: !!(isRangeBlocked(iso) || rule),
+            restricted: !!rule,
+            label: rule?.label ?? null,
             isToday: iso === todayIso,
             isSelected: iso === selectedIso,
         };
@@ -298,7 +371,14 @@ function syncView() {
 }
 
 function pickDay(day) {
-    if (day.disabled) return;
+    if (day.disabled) {
+        // only listed dates with a label get a balloon
+        if (day.label) showBalloon(day.iso, day.label);
+        else hideBalloon();
+        return;
+    }
+    hideBalloon();
+
     const keep = selected.value ?? { h: 0, mi: 0, s: 0 };
     emit('update:modelValue', format({ y: day.y, m: day.m, d: day.d, h: keep.h, mi: keep.mi, s: keep.s }));
 
@@ -359,6 +439,16 @@ const onMinute = (e) => setTime(hour.value, +e.target.value, second.value);
 const onSecond = (e) => setTime(hour.value, minute.value, +e.target.value);
 
 // ---- open / close ----
+const isOpen = computed(() => props.inline || open.value);
+
+// Inline has no open event to sync the view, so follow the selected date's month.
+// Only the date part is watched, so changing the time doesn't snap the view back.
+watch(
+    () => props.modelValue?.slice(0, 10),
+    () => props.inline && syncView()
+);
+
+
 function toggle() {
     if (props.disabled) return;
     if (open.value) close();
@@ -386,4 +476,34 @@ function onKeydown(e) {
 
 const selectClass =
     'rounded border border-gray-300 bg-white px-2 py-1 text-sm focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-300';
+
+
+const balloon = ref(null); // { iso, label }
+let balloonTimer;
+
+function showBalloon(iso, label) {
+    clearTimeout(balloonTimer);
+    balloon.value = { iso, label };
+    balloonTimer = setTimeout(hideBalloon, 2500);
+}
+
+function hideBalloon() {
+    clearTimeout(balloonTimer);
+    balloon.value = null;
+}
+
+// hide when the month or year changes, or the picker opens or closes
+watch([viewMonth, viewYear, open], hideBalloon);
+onBeforeUnmount(() => clearTimeout(balloonTimer));
+
+// keeps the balloon inside the dropdown on the first and last columns
+function balloonPos(i) {
+    const col = i % 7;
+    return {
+        box: col === 0 ? 'left-0' : col === 6 ? 'right-0' : 'left-1/2 -translate-x-1/2',
+        arrow: col === 0 ? 'left-3.5' : col === 6 ? 'right-3.5' : 'left-1/2 -translate-x-1/2',
+    };
+}
+
+if (props.inline) syncView();
 </script>

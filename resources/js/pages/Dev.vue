@@ -51,15 +51,15 @@
             <div class="flex-1 flex flex-col gap-2">
                 <div>
                     <div class="text-sm text-gray-700">Date only</div>
-                    <BaseDatePicker class="self-start" v-model="birthday" clearable />
+                    <BaseDatePicker class="self-start" v-model="birthday" clearable disabled />
                 </div>
                 <div class="p-2 border border-dashed border-slate-300 text-sm text-gray-700">{{birthday}}</div>
             </div>
 
             <div class="flex-1 flex flex-col gap-2">
                 <div>
-                    <div class="text-sm text-gray-700">Restricted range, week starts Monday</div>
-                    <BaseDatePicker class="self-start" v-model="birthday" min="2026-10-01" max="2026-12-31" :week-start="1" />
+                    <div class="text-sm text-gray-700">Restricted range & dates, week starts Monday</div>
+                    <BaseDatePicker class="self-start" v-model="birthday" min="2026-10-01" max="2026-12-31" :week-start="1" :disabled-dates="restricted" :disabled-weekdays="[0, 6]" disabled-color="red" inline />
                 </div>
                 <div class="p-2 border border-dashed border-slate-300 text-sm text-gray-700">{{birthday}}</div>
             </div>
@@ -67,7 +67,7 @@
             <div class="flex-1 flex flex-col gap-2">
                 <div>
                     <div class="text-sm text-gray-700">Error state</div>
-                    <BaseDatePicker class="self-start" v-model="birthday" :error="!!errors.birthday" />
+                    <BaseDatePicker class="self-start" v-model="birthday" :error="!!errors.birthday" align="right" />
                 </div>
                 <div class="p-2 border border-dashed border-slate-300 text-sm text-gray-700">{{birthday}}</div>
             </div>
@@ -85,7 +85,7 @@
             <div class="flex-1 flex flex-col gap-2">
                 <div>
                     <div class="text-sm text-gray-700">Longer history, no future years</div>
-                    <BaseDatePicker class="self-start" v-model="historyAppointment" mode="datetime" :years-before="120" :years-after="0" />
+                    <BaseDatePicker class="self-start" v-model="historyAppointment" mode="datetime" :years-before="120" :years-after="0" max="2026-12-31" inline />
                 </div>
                 <div class="p-2 border border-dashed border-slate-300 text-sm text-gray-700">{{historyAppointment}}</div>
             </div>
@@ -93,7 +93,7 @@
             <div class="flex-1 flex flex-col gap-2">
                 <div>
                     <div class="text-sm text-gray-700">Min/max override the year range</div>
-                    <BaseDatePicker class="self-start" v-model="anotherAppointment" mode="datetime" min="2026-01-01" max="2028-12-31" />
+                    <BaseDatePicker class="self-start" v-model="anotherAppointment" mode="datetime" min="2026-01-01" max="2028-12-31" align="right"/>
                 </div>
                 <div class="p-2 border border-dashed border-slate-300 text-sm text-gray-700">{{anotherAppointment}}</div>
             </div>
@@ -269,6 +269,16 @@ const errors = ref({
 });
 
 const birthday = ref(null);                 // '2026-10-09'
+const restricted = [
+    { date: '2026-10-09', label: 'Disabled' },
+    { date: '2026-11-04', label: 'Not available' },
+    { date: '2026-11-05', label: 'Cancelled' },
+    { date: '2026-11-06', label: 'Fully booked' }, // if any is duplicate: ignored, the first entry wins
+    { date: '2026-11-07', label: 'Abort' },
+    { date: '2026-11-15', label: null },
+    { date: '2026-11-16', label: '' },
+    { date: '2026-11-17' },
+];
 const appointment = ref('2026-10-09 14:30:26'); // '2026-10-09 14:30:26'
 
 const historyAppointment = ref('1908-12-10 15:10:18'); // '1908-12-10 15:10:18'
