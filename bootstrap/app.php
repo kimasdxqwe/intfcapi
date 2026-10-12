@@ -40,10 +40,6 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
 
-        $middleware->encryptCookies([
-            'refresh_token'
-        ]);
-
         $middleware->alias([
             'ensure_client_is_resource_owner' => \App\Http\Middleware\EnsureClientIsCustomOwner::class,
 

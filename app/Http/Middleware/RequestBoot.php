@@ -18,15 +18,6 @@ class RequestBoot
     {
         $debugEnabled = false;
 
-        $setRefreshTokenIntoTheRequestForm = $request->hasCookie('refresh_token') && !$request->has('refresh_token');
-
-        if($setRefreshTokenIntoTheRequestForm){
-
-            $refresh_token = $request->cookie('refresh_token');
-
-            $request->request->set('refresh_token', $refresh_token);
-        }
-
         $requestPayload = $request->get('payload');
         $requestPayload = is_string($requestPayload) ? json_decode($requestPayload) : (object)[];
 
