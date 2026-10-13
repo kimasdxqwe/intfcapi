@@ -28,11 +28,11 @@ class CheckToken extends ValidateToken
 
             $requestInterface->oAuthContext->resolveAccessToken($token, 1, $params);
 
-            _debug([
-                'Token' => $requestInterface->oAuthContext->accessToken
-            ]);
-
             if($debugEnabled){
+                _debug([
+                    'Token' => $requestInterface->oAuthContext->accessToken
+                ]);
+
                 $requestInterface->debug('CheckToken After');
             }
         }
