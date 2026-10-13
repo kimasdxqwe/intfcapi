@@ -61,6 +61,11 @@ export const useLaraFetch = createFetch({
                     return ctx;
                 }
 
+                if (ctx.response?.status === 422) {
+
+                    return ctx; // validation errors: the form shows them inline
+                }
+
                 modal.alert(null, {
                     title: 'Client error',
                     subTitle: message ?? 'Message not found',
