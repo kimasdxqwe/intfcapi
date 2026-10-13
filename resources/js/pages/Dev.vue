@@ -47,6 +47,20 @@
             <BaseButton :variant="'clear'" @click="editProfile" :label="'Form'" />
         </div>
 
+        <div class="mt-4 flex flex-wrap gap-2">
+            <BaseFileInput v-model="avatar" accept="image/*" :max-size="2 * 1024 * 1024" @change="onFilesChange" />
+
+            <BaseFileInput
+                v-model="documents"
+                multiple
+                accept="image/*,.pdf"
+                :max-size="5 * 1024 * 1024"
+                :max-files="5"
+                @reject="(items) => console.log(items)"
+                @change="onFilesChange"
+            />
+        </div>
+
         <div class="mt-4 flex flex-col gap-2">
             <div class="p-2 border border-dashed border-slate-300 text-sm text-gray-700">
                 Selected: {{selected}}
@@ -193,6 +207,7 @@ import BaseCheckBoxGroup from "@/components/BaseCheckBoxGroup.vue";
 import BaseRadioGroup from "@/components/BaseRadioGroup.vue";
 import BaseDatePicker from "@/components/BaseDatePicker.vue";
 import BaseCheckbox from "@/components/BaseCheckbox.vue";
+import BaseFileInput from "@/components/BaseFileInput.vue";
 
 const { isProduction } = useEnv();
 const metaEnv = import.meta.env;
@@ -354,6 +369,38 @@ async function onSort(field) {
     // fetch from your API using sortHeaders.value[field].direction, then:
     await new Promise((r) => setTimeout(r, 800));
     sortPending.value = null;
+}
+
+const avatar = ref([]);      // single: 0 or 1 File
+const documents = ref([]);   // multiple: any number of Files
+
+function onFilesChange({ action, files, added, removed }) {
+
+    console.log({
+        'File changed': {
+            'action': action,
+            'files': files,
+            'added': added,
+            'removed': removed,
+        }
+    });
+
+    const form = new FormData();
+
+    if (avatar.value.length) form.append('avatar', avatar.value[0]);
+    documents.value.forEach((file) => form.append('documents[]', file));
+
+    console.log({
+        'Form entries': form.entries()
+    });
+
+    console.table(
+        [...form.entries()].map(([key, v]) => ({
+            key,
+            kind: v instanceof File ? 'file' : 'text',
+            value: v instanceof File ? `${v.name} (${v.size} bytes)` : v,
+        }))
+    );
 }
 </script>
 
