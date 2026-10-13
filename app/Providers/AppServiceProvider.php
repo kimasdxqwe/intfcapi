@@ -21,11 +21,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-//        Passport::tokensExpireIn(CarbonInterval::day(15));
+//        Passport::tokensExpireIn(CarbonInterval::day(10));
         Passport::tokensExpireIn(CarbonInterval::minutes(10));
 
 //        Passport::refreshTokensExpireIn(CarbonInterval::days(60));
-        Passport::refreshTokensExpireIn(CarbonInterval::minutes(3));
+        Passport::refreshTokensExpireIn(CarbonInterval::minutes(1));
+
+        Passport::personalAccessTokensExpireIn(CarbonInterval::months(3));
 
         Passport::tokensCan([
             'wms:zread' => 'Perform Zread',
