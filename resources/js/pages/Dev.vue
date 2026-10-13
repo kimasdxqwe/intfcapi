@@ -47,6 +47,33 @@
             <BaseButton :variant="'clear'" @click="editProfile" :label="'Form'" />
         </div>
 
+        <div class="mt-4 flex flex-col gap-2">
+            <div class="p-2 border border-dashed border-slate-300 text-sm text-gray-700">
+                Selected: {{selected}}
+            </div>
+            <div>
+                <BaseDataTable
+                    v-model="selected"
+                    v-model:sort-headers="sortHeaders"
+                    :sort-pending="sortPending"
+                    :headers="headers"
+                    :rows="rows"
+                    selection
+                    sortable
+                    striped
+                    :compact="true"
+                    header-theme="light"
+                    :show-max-rows="0"
+                    show-no-data
+                    @sort="onSort"
+                >
+                    <template #cell.actions="{ cell, rowIndex }">
+                        <button class="rounded border border-gray-300 px-2 text-xs hover:bg-gray-100" @click="console.log(cell.id, rowIndex)">Edit</button>
+                    </template>
+                </BaseDataTable>
+            </div>
+        </div>
+
         <div class="mt-4 flex flex-wrap gap-2">
             <div class="flex-1 flex flex-col gap-2">
                 <div>
@@ -154,6 +181,7 @@
 <script setup>
 
 import BaseButton from "@/components/BaseButton.vue";
+import BaseDataTable, { DATA_SORT } from '@/components/BaseDataTable.vue';
 import BaseSelect from '@/components/BaseSelect.vue';
 import PrototypeEditForm from '@/components/PrototypeEditForm.vue';
 import { useAuthStore } from '@/stores/auth';
@@ -290,6 +318,43 @@ const appointment = ref('2026-10-09 14:30:26'); // '2026-10-09 14:30:26'
 
 const historyAppointment = ref('1908-12-10 15:10:18'); // '1908-12-10 15:10:18'
 const anotherAppointment = ref('2026-12-10 15:10:18'); // '2026-12-10 15:10:18'
+
+const selected = ref([1, 3]);          // numbers match string ids ('1', '3')
+const sortPending = ref(null);
+
+const sortHeaders = ref({
+    employee_number: { field: 'employee_number', direction: DATA_SORT.DEFAULT },
+    employee_full_name: { field: 'employee_full_name', direction: DATA_SORT.DEFAULT },
+    employee_salary: { field: 'employee_salary', direction: DATA_SORT.DEFAULT },
+});
+
+const headers = [
+    { text: '', value: 'actions', width: '180px' },
+    { text: 'Username', value: 'username', alignData: 'left' },
+    { text: 'Employee #', value: 'employee_number', alignData: 'left' },
+    { text: 'Name', value: 'employee_full_name', alignData: 'left' },
+    { text: 'Salary', value: 'employee_salary', isNumeric: true, alignData: 'right', alignHeader: 'right' },
+];
+
+const rows = ref([
+    { id: '1', username: 'johndoe', employee_number: '12-3223-09', employee_full_name: 'John Doe', employee_salary: '1,100.00' },
+    { id: '2', isSelectable: false, username: 'jmarry', employee_number: '12-3334-56', employee_full_name: 'Jane Marry', employee_salary: '1,800.00' },
+    { id: '3', username: 'palamuerta', employee_number: '11-6788-36', employee_full_name: 'Palamuerta Weuj\nSecond line\nThird line', employee_salary: '2,450.00' },
+    ...Array.from({ length: 12 }, (_, i) => ({
+        id: 10 + i, // numeric ids work too
+        username: `user${i}`,
+        employee_number: `99-000${i}-00`,
+        employee_full_name: `Test Employee ${i}`,
+        employee_salary: '1,000.00',
+    })),
+]);
+
+async function onSort(field) {
+    sortPending.value = field;
+    // fetch from your API using sortHeaders.value[field].direction, then:
+    await new Promise((r) => setTimeout(r, 800));
+    sortPending.value = null;
+}
 </script>
 
 <style scoped>
