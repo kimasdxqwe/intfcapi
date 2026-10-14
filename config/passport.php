@@ -45,4 +45,15 @@ return [
 
     'connection' => env('PASSPORT_CONNECTION'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Development variables
+    |--------------------------------------------------------------------------
+    |
+    | Specify development access and refresh token lifetime by the number of minutes
+    |
+    */
+
+    'dev_passport_token_lifetime' => (int) env('DEV_PASSPORT_TOKEN_LIFETIME', 10),
+    'dev_passport_refresh_token_lifetime' => (int) env('DEV_PASSPORT_REFRESH_TOKEN_LIFETIME', 60),
 ];

@@ -21,17 +21,22 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-//        Passport::tokensExpireIn(CarbonInterval::day(10));
-        Passport::tokensExpireIn(CarbonInterval::minutes(10));
+        $isProductionEnvironment = app()->environment('production', 'prod');
 
-//        Passport::refreshTokensExpireIn(CarbonInterval::days(60));
-        Passport::refreshTokensExpireIn(CarbonInterval::minutes(1));
+        if($isProductionEnvironment){
+
+            Passport::tokensExpireIn(CarbonInterval::day(10));
+            Passport::refreshTokensExpireIn(CarbonInterval::days(60));
+
+        } else {
+
+            Passport::tokensExpireIn(CarbonInterval::minutes(config('passport.dev_passport_token_lifetime')));
+            Passport::refreshTokensExpireIn(CarbonInterval::minutes(config('passport.dev_passport_refresh_token_lifetime')));
+        }
 
         Passport::personalAccessTokensExpireIn(CarbonInterval::months(3));
 
         Passport::tokensCan([
-            'wms:zread' => 'Perform Zread',
-            'wms:xread' => 'Perform Xread',
             'user:read' => 'Read authenticated profile',
             'wms:interfacing' => 'Manage interfacing on your behalf',
         ]);
