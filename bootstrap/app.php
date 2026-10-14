@@ -55,6 +55,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append([
             \App\Http\Middleware\RequestBoot::class,
         ]);
+
+        $middleware->web(append: [
+            \App\Http\Middleware\LogoutAfterOAuthDecision::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
 
