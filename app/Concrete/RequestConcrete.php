@@ -3,6 +3,7 @@
 namespace App\Concrete;
 
 use App\Blueprint\RequestInterface;
+use Illuminate\Container\Attributes\Singleton;
 
 #[Singleton]
 class RequestConcrete implements RequestInterface
