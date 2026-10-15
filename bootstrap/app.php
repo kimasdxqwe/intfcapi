@@ -11,6 +11,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Routing\Exceptions\BackedEnumCaseNotFoundException;
 use Illuminate\Routing\Exceptions\InvalidSignatureException;
@@ -77,16 +78,17 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->render(function(Throwable $throwable){
 
-            $csrfTokenMismatch = false;
-            $serviceUnavailable = false;
+            $statusCode = null;
 
-            $thrownIsHttpExceptionInterface = $throwable instanceof HttpExceptionInterface && is_callable([$throwable, 'getStatusCode']);
+            $thrownIsHttpExceptionInterface = $throwable instanceof HttpExceptionInterface
+                && is_callable([$throwable, 'getStatusCode']);
 
             if($thrownIsHttpExceptionInterface) {
 
-                $csrfTokenMismatch = $throwable->getStatusCode() == 419;
-                $serviceUnavailable = $throwable->getStatusCode() == 503;
+                $statusCode = $throwable->getStatusCode();
             }
+
+            $clientError = !is_null($statusCode) && ($statusCode >= 400 && $statusCode < 500);
 
             if(!app()->environment('production', 'prod')) {
 
@@ -95,8 +97,6 @@ return Application::configure(basePath: dirname(__DIR__))
                     'Exception instance?' => ($throwable instanceof Exception ? 'TRUE' : 'FALSE'),
                     'Error instance?' => ($throwable instanceof Error ? 'TRUE' : 'FALSE'),
                     'thrown is HttpExceptionInterface' => $thrownIsHttpExceptionInterface,
-                    'CSRF token mismatch?' => $csrfTokenMismatch,
-                    'Service unavailable?' => $serviceUnavailable,
                     'HttpException status code' => $thrownIsHttpExceptionInterface ? $throwable->getStatusCode() : null,
                     'message' => $throwable->getMessage(),
                     'file' => $throwable->getFile(),
@@ -117,14 +117,14 @@ return Application::configure(basePath: dirname(__DIR__))
                     ValidationException::class
                 ]) ? 'notice' : 'error';
 
+                $logAction = $clientError ? 'notice' : $logAction;
+
                 Log::channel('error')->{$logAction}([
                     ('thrown') => get_class($throwable),
                     'Exception instance?' => ($throwable instanceof Exception ? 'TRUE' : 'FALSE'),
                     'Error instance?' => ($throwable instanceof Error ? 'TRUE' : 'FALSE'),
                     'thrown is HttpExceptionInterface' => $thrownIsHttpExceptionInterface,
-                    'CSRF token mismatch?' => $csrfTokenMismatch,
-                    'Service unavailable?' => $serviceUnavailable,
-                    'HttpException status code' => $thrownIsHttpExceptionInterface ? $throwable->getStatusCode() : null,
+                    'HttpExceptionInterface status code' => $thrownIsHttpExceptionInterface ? $throwable->getStatusCode() : null,
                     'message' => $throwable->getMessage(),
                     'file' => $throwable->getFile(),
                     'line' => $throwable->getLine(),
@@ -146,6 +146,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             if($throwable instanceof Exception){
+
                 $render = match(true){
                     $throwable instanceof NotFoundHttpException,
                     $throwable instanceof RecordsNotFoundException => ResponseJson::notFoundResponse(),
@@ -154,9 +155,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     $throwable instanceof AuthorizationException && !$throwable->hasStatus() => ResponseJson::responseByCode(Response::HTTP_FORBIDDEN),
                     $throwable instanceof SuspiciousOperationException => ResponseJson::notFoundResponse('Bad hostname provided.'),
                     $throwable instanceof TokenMismatchException => ResponseJson::notAcceptableResponse(),
-                    ($throwable instanceof HttpExceptionInterface && $serviceUnavailable) => ResponseJson::serviceUnavailableResponse($throwable->getMessage()),
-                    $throwable instanceof AuthenticationException,
-                    ($throwable instanceof HttpExceptionInterface && $csrfTokenMismatch) => ResponseJson::unauthorizedResponse($throwable->getMessage()),
+                    $throwable instanceof AuthenticationException => ResponseJson::unauthorizedResponse($throwable->getMessage()),
                     $throwable instanceof ValidationException => ResponseJson::validationErrorResponse($throwable->errors(), $throwable->getMessage()),
                     $throwable instanceof ThrottleRequestsException => ResponseJson::tooManyRequestsResponse(),
                     $throwable instanceof MethodNotAllowedHttpException => ResponseJson::methodNotAllowedResponse(),
@@ -166,11 +165,23 @@ return Application::configure(basePath: dirname(__DIR__))
                     default => $throwable,
                 };
 
-                if($render instanceof \Illuminate\Http\JsonResponse){
+                if(!($render instanceof JsonResponse) && !is_null($statusCode)){
+
+                    $render = match($statusCode) {
+                        Response::HTTP_SERVICE_UNAVAILABLE => ResponseJson::serviceUnavailableResponse($throwable->getMessage()),
+                        Response::HTTP_FORBIDDEN => ResponseJson::forbiddenResponse($throwable->getMessage()),
+                        419 => ResponseJson::pageExpired($throwable->getMessage()),
+                        default => $render,
+                    };
+                }
+
+                if($render instanceof JsonResponse){
                     return $render;
                 }
             }
 
-            return ResponseJson::serverErrorResponse();
+            return $clientError
+                ? ResponseJson::badRequestResponse()
+                : ResponseJson::serverErrorResponse();
         });
     })->create();
