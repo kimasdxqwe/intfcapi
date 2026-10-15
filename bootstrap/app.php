@@ -60,7 +60,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->web(append: [
-            \App\Http\Middleware\LogoutAfterOAuthDecision::class,
+            \App\Http\Middleware\LogoutWebGuardAfterOAuthDecision::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
