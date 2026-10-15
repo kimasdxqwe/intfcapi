@@ -54,7 +54,7 @@ export const useLaraFetch = createFetch({
 
             if (ctx.response?.status >= 400 && ctx.response?.status < 500) {
 
-                if (ctx.response?.status === 401) {
+                if ([401, 419].includes(ctx.response?.status)) {
 
                     window.dispatchEvent(new Event('auth:unauthenticated'));
 
