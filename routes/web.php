@@ -9,6 +9,23 @@ if(!app()->environment('production', 'prod')) {
     Route::get('/php-info', function () {
         phpinfo();
     });
+
+    Route::group([
+        'middleware' => ['auth']
+    ], function () {
+
+        Route::post('/test-post', function (Request $request){
+            return $request->user();
+        });
+
+        Route::patch('/test-patch/{identifier}', function (Request $request, $identifier){
+            return ['identifier'=> $identifier];
+        });
+
+        Route::delete('/test-delete/{identifier}', function (Request $request, $identifier){
+            return ['identifier'=> $identifier];
+        });
+    });
 }
 
 Route::view('/', 'welcome');
@@ -18,7 +35,6 @@ Route::group([
 ], function () {
 
     Route::get('/user', fn (Request $request) => $request->user());
-    Route::post('/user', fn (Request $request) => $request->user());
 
     Route::post('/logout', [AuthenticationController::class, 'logout'])
         ->name('logout');

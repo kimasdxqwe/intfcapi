@@ -9,11 +9,11 @@
 
         <div class="mt-4 flex flex-col gap-2">
 
-            <BaseButton class="self-start" :variant="'default'" @click="getUser()" :disabled="getUserPending">
+            <BaseButton class="self-start" :variant="'default'" @click="getUser()" :disabled="getUserPending" :pending="getUserPending">
                 {{ getUserPending ? 'Fetching...' : 'GET Authenticated' }}
             </BaseButton>
 
-            <div v-if="!getUserPending" class="p-2 border border-dashed border-slate-300 text-sm text-gray-700">
+            <div class="p-2 border border-dashed border-slate-300 text-sm text-gray-700">
                 <div>
                     Data: {{getUserData}}
                 </div>
@@ -22,16 +22,42 @@
                 </div>
             </div>
 
-            <BaseButton class="self-start" :variant="'default'" @click="postUser()" :disabled="postUserPending">
-                {{ postUserPending ? 'Fetching...' : 'POST Authenticated' }}
+            <BaseButton class="self-start" :variant="'default'" @click="postMethod()" :disabled="postMethodPending" :pending="postMethodPending">
+                {{ postMethodPending ? 'Fetching...' : 'POST Method' }}
             </BaseButton>
 
-            <div v-if="!postUserPending" class="p-2 border border-dashed border-slate-300 text-sm text-gray-700">
+            <div class="p-2 border border-dashed border-slate-300 text-sm text-gray-700">
                 <div>
-                    Data: {{postUserData}}
+                    Data: {{postMethodData}}
                 </div>
                 <div>
-                    Error: {{postUserError?.message}}
+                    Error: {{postMethodError?.message}}
+                </div>
+            </div>
+
+            <BaseButton class="self-start" :variant="'default'" @click="patchMethod()" :disabled="patchMethodPending" :pending="patchMethodPending">
+                {{ patchMethodPending ? 'Fetching...' : 'PATCH Method' }}
+            </BaseButton>
+
+            <div class="p-2 border border-dashed border-slate-300 text-sm text-gray-700">
+                <div>
+                    Data: {{patchMethodData}}
+                </div>
+                <div>
+                    Error: {{patchMethodError?.message}}
+                </div>
+            </div>
+
+            <BaseButton class="self-start" :variant="'danger'" @click="deleteMethod()" :disabled="deleteMethodPending" :pending="deleteMethodPending">
+                {{ deleteMethodPending ? 'Fetching...' : 'DELETE Method' }}
+            </BaseButton>
+
+            <div class="p-2 border border-dashed border-slate-300 text-sm text-gray-700">
+                <div>
+                    Data: {{deleteMethodData}}
+                </div>
+                <div>
+                    Error: {{deleteMethodError?.message}}
                 </div>
             </div>
         </div>
@@ -228,12 +254,28 @@ const {
 } = useLaraFetch('/user', { immediate: false }).get().json();
 
 const {
-    data: postUserData,
-    error: postUserError,
-    isFetching: postUserPending,
-    statusCode: postUserStatusCode,
-    execute: postUser
-} = useLaraFetch('/user', { immediate: false }).post().json();
+    data: postMethodData,
+    error: postMethodError,
+    isFetching: postMethodPending,
+    statusCode: postMethodStatusCode,
+    execute: postMethod
+} = useLaraFetch('/test-post', { immediate: false }).post().json();
+
+const {
+    data: patchMethodData,
+    error: patchMethodError,
+    isFetching: patchMethodPending,
+    statusCode: patchMethodStatusCode,
+    execute: patchMethod
+} = useLaraFetch(`/test-patch/${1234}`, { immediate: false }).patch().json();
+
+const {
+    data: deleteMethodData,
+    error: deleteMethodError,
+    isFetching: deleteMethodPending,
+    statusCode: deleteMethodStatusCode,
+    execute: deleteMethod
+} = useLaraFetch(`/test-delete/${5678}`, { immediate: false }).delete().json();
 
 async function showAlert() {
 
