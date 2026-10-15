@@ -19,6 +19,19 @@ class User extends Authenticatable implements OAuthenticatable
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
+    protected $fillable = [
+        'name',
+        'email',
+        'email_verified_at',
+        'password',
+        'remember_token',
+    ];
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
+
     /**
      * Get the attributes that should be cast.
      *
