@@ -25,6 +25,7 @@ class EnsureUserOrClientOwner
 
         // Try user-scoped auth (authorization code / PKCE tokens)
         if (Auth::guard('api')->check()) {
+            Auth::shouldUse('api');
             return $next($request);
         }
 
