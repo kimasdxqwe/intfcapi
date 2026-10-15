@@ -39,6 +39,11 @@ class JsonResponseScaffolder
         return $this->response(false, null, $message, $errors, Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
+    public function badRequestResponse($message = 'Bad request.'): JsonResponse
+    {
+        return $this->response(false, null, $message, [], Response::HTTP_BAD_REQUEST);
+    }
+
     public function unauthorizedResponse($message = 'Unauthorized.'): JsonResponse
     {
         return $this->response(false, null, $message, [], Response::HTTP_UNAUTHORIZED);
@@ -66,7 +71,7 @@ class JsonResponseScaffolder
      * @param string $message
      * @return JsonResponse
      */
-    public function sessionExpired($message = 'Session expired.'): JsonResponse
+    public function pageExpired($message = 'Page expired.'): JsonResponse
     {
         return $this->response(false, null, $message, [], 419);
     }
