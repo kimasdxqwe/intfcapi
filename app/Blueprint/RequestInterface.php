@@ -13,6 +13,8 @@ use Laravel\Passport\AccessToken;
  **/
 interface RequestInterface
 {
+    public function oAuthContextPresenter(): array;
+
     public function debug($caller): void;
 
     public function debugOAuth($caller): void;

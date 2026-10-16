@@ -21,29 +21,34 @@ class RequestConcrete implements RequestInterface
         $this->orders = (object) [];
     }
 
+    public function oAuthContextPresenter(): array
+    {
+        return [
+            'resolved' => $this->oAuthContext->resolved,
+            ...($this->oAuthContext->resolved
+                ? [
+                    'route' => [
+                        'path' => request()->path(),
+                        'scope?' => $this->oAuthContext->scopeFlag ? 'scope' : 'scopes',
+                        'scope params' => $this->oAuthContext->scopes,
+                    ],
+                    'token' => [
+                        'token instance' => get_class($this->oAuthContext?->accessToken),
+                        ...($this->oAuthContext->resolved
+                            ? $this->oAuthContext->accessToken?->toArray()
+                            : []
+                        )
+                    ]
+                ]
+                : [])
+        ];
+    }
+
     public function debug($caller): void
     {
         _debug([
             $caller . ' RequestConcrete all' => [
-                'oauth' => [
-                    'resolved' => $this->oAuthContext->resolved,
-                    ...($this->oAuthContext->resolved
-                        ? [
-                            'route' => [
-                                'path' => request()->path(),
-                                'scope?' => $this->oAuthContext->scopeFlag ? 'scope' : 'scopes',
-                                'scope params' => $this->oAuthContext->scopes,
-                            ],
-                            'token' => [
-                                'token instance' => get_class($this->oAuthContext?->accessToken),
-                                ...($this->oAuthContext->resolved
-                                    ? $this->oAuthContext->accessToken?->toArray()
-                                    : []
-                                )
-                            ]
-                        ]
-                        : [])
-                ],
+                'oauth' => $this->oAuthContextPresenter(),
                 'payload' => $this->payload,
                 'filters' => $this->filters,
                 'orders' => $this->orders,
@@ -53,27 +58,7 @@ class RequestConcrete implements RequestInterface
 
     public function debugOAuth($caller): void
     {
-        _debug([
-            $caller . ' RequestConcrete oauth' => [
-                'resolved' => $this->oAuthContext->resolved,
-                ...($this->oAuthContext->resolved
-                    ? [
-                        'route' => [
-                            'path' => request()->path(),
-                            'scope?' => $this->oAuthContext->scopeFlag ? 'scope' : 'scopes',
-                            'scope params' => $this->oAuthContext->scopes,
-                        ],
-                        'token' => [
-                            'token instance' => get_class($this->oAuthContext?->accessToken),
-                            ...($this->oAuthContext->resolved
-                                ? $this->oAuthContext->accessToken?->toArray()
-                                : []
-                            )
-                        ]
-                    ]
-                    : []),
-            ],
-        ]);
+        _debug([$caller . ' RequestConcrete oauth' => $this->oAuthContextPresenter()]);
     }
 
     public function debugPayload($caller): void
