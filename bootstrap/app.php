@@ -53,7 +53,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'scope' => \App\Http\Middleware\CheckToken::class,
 
             //Combinator of auth:api and ensure_client_is_resource_owner
-            'ensure_user_or_client' => \App\Http\Middleware\EnsureUserOrClientOwner::class
+            'ensure_user_or_client' => \App\Http\Middleware\EnsureUserOrClientOwner::class,
+            'user_scoped_auth' => \App\Http\Middleware\AccessTokenIsBoundToUser::class
         ]);
 
         $middleware->append([

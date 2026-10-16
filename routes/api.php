@@ -4,9 +4,11 @@ use App\Http\Controllers\OAuthContextController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:api');
+Route::middleware([
+    'ensure_user_or_client',
+    'user_scoped_auth',
+    'scope:user:read'
+])->get('/user', fn (Request $request) => $request->user());
 
 Route::group([
     'middleware' => [
