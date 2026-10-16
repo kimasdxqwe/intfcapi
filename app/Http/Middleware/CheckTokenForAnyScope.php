@@ -8,14 +8,14 @@ use Laravel\Passport\Contracts\ScopeAuthorizable;
 use Laravel\Passport\Exceptions\MissingScopeException;
 use Laravel\Passport\Http\Middleware\ValidateToken;
 
-class CheckToken extends ValidateToken
+class CheckTokenForAnyScope extends ValidateToken
 {
     protected function validate(ScopeAuthorizable $token, string ...$params): void
     {
         $debugEnabled = false;
 
         if($debugEnabled){
-            _debug('CheckToken');
+            _debug('CheckTokenForAnyScope');
         }
 
         $requestInterface = app(RequestInterface::class);
@@ -23,7 +23,7 @@ class CheckToken extends ValidateToken
         if($token instanceof AccessToken){
 
             if($debugEnabled){
-                $requestInterface->debug('CheckToken Before');
+                $requestInterface->debug('CheckTokenForAnyScope Before');
             }
 
             $requestInterface->oAuthContext->resolveAccessToken($token, 1, $params);
@@ -33,7 +33,7 @@ class CheckToken extends ValidateToken
                     'Token' => $requestInterface->oAuthContext->accessToken
                 ]);
 
-                $requestInterface->debug('CheckToken After');
+                $requestInterface->debug('CheckTokenForAnyScope After');
             }
         }
 

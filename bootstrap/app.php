@@ -50,7 +50,7 @@ return Application::configure(basePath: dirname(__DIR__))
             //Custom Laravel\Passport\Http\Middleware\CheckToken
             'scopes' => \App\Http\Middleware\CheckTokens::class,
             //Custom Laravel\Passport\Http\Middleware\CheckTokenForAnyScope
-            'scope' => \App\Http\Middleware\CheckToken::class,
+            'scope' => \App\Http\Middleware\CheckTokenForAnyScope::class,
 
             //Combinator of auth:api and ensure_client_is_resource_owner
             'ensure_user_or_client' => \App\Http\Middleware\EnsureUserOrClientOwner::class,
