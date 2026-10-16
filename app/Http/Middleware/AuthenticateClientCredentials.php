@@ -7,7 +7,7 @@ use Laravel\Passport\Contracts\ScopeAuthorizable;
 use Laravel\Passport\Exceptions\AuthenticationException;
 use Laravel\Passport\Http\Middleware\ValidateToken;
 
-class EnsureClientIsCustomOwner extends ValidateToken
+class AuthenticateClientCredentials extends ValidateToken
 {
     /**
      * @throws AuthenticationException

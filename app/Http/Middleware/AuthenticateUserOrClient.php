@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureUserOrClientOwner
+class AuthenticateUserOrClient
 {
     /**
      * Handle an incoming request.
@@ -23,7 +23,6 @@ class EnsureUserOrClientOwner
             _debug('attempt Auth:api');
         }
 
-        // Try user-scoped auth (authorization code / PKCE tokens)
         if (Auth::guard('api')->check()) {
             Auth::shouldUse('api');
             return $next($request);
@@ -33,7 +32,6 @@ class EnsureUserOrClientOwner
             _debug('Auth:api failed... now checking client credentials.');
         }
 
-        // Fall back to client-credentials / resource-owner check.
-        return app(EnsureClientIsCustomOwner::class)->handle($request, $next);
+        return app(AuthenticateClientCredentials::class)->handle($request, $next);
     }
 }

@@ -3,6 +3,13 @@
 use App\Concrete\FractalTransformer;
 use App\Concrete\JsonResponseScaffolder;
 use App\Facades\ResponseJson;
+use App\Http\Middleware\AccessTokenIsBoundToUser;
+use App\Http\Middleware\CheckToken;
+use App\Http\Middleware\CheckTokenForAnyScope;
+use App\Http\Middleware\AuthenticateClientCredentials;
+use App\Http\Middleware\AuthenticateUserOrClient;
+use App\Http\Middleware\LogoutWebGuardAfterOAuthDecision;
+use App\Http\Middleware\RequestBoot;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -45,24 +52,19 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
 
         $middleware->alias([
-            'ensure_client_is_resource_owner' => \App\Http\Middleware\EnsureClientIsCustomOwner::class,
-
-            //Custom Laravel\Passport\Http\Middleware\CheckToken
-            'scopes' => \App\Http\Middleware\CheckToken::class,
-            //Custom Laravel\Passport\Http\Middleware\CheckTokenForAnyScope
-            'scope' => \App\Http\Middleware\CheckTokenForAnyScope::class,
-
-            //Combinator of auth:api and ensure_client_is_resource_owner
-            'ensure_user_or_client' => \App\Http\Middleware\EnsureUserOrClientOwner::class,
-            'user_scoped_auth' => \App\Http\Middleware\AccessTokenIsBoundToUser::class
+            'auth_client_credentials' => AuthenticateClientCredentials::class,
+            'auth_user_or_client' => AuthenticateUserOrClient::class,
+            'user_scoped_auth' => AccessTokenIsBoundToUser::class,
+            'scopes' => CheckToken::class,
+            'scope' => CheckTokenForAnyScope::class,
         ]);
 
         $middleware->append([
-            \App\Http\Middleware\RequestBoot::class,
+            RequestBoot::class,
         ]);
 
         $middleware->web(append: [
-            \App\Http\Middleware\LogoutWebGuardAfterOAuthDecision::class,
+            LogoutWebGuardAfterOAuthDecision::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

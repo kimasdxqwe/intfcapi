@@ -5,14 +5,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware([
-    'ensure_user_or_client',
+    'auth_user_or_client',
     'user_scoped_auth',
     'scope:user:read'
 ])->get('/user', fn (Request $request) => $request->user());
 
 Route::group([
     'middleware' => [
-        'ensure_user_or_client'
+        'auth_user_or_client'
     ],
     'prefix' => 'v1'
 ], function(){
