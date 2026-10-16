@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\OAuthContextController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,14 +17,11 @@ Route::group([
 
     Route::group([
         'middleware' => [
-            'scope:wms:xread,wms:zread,wms:interfacing'
+            'scope:wms:interfacing'
         ]
     ], function(){
 
-        // Access token is valid and the client is resource owner...
-        Route::get('/client-auth', [\App\Http\Controllers\DebugController::class, 'index'])
-            ->name('client-auth');
-            //->middleware('scopes:wms:xread,wms:zread');
+        Route::get('/oauth-context', OAuthContextController::class)->name('oauth-context');
     });
 });
 
