@@ -48,7 +48,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'ensure_client_is_resource_owner' => \App\Http\Middleware\EnsureClientIsCustomOwner::class,
 
             //Custom Laravel\Passport\Http\Middleware\CheckToken
-            'scopes' => \App\Http\Middleware\CheckTokens::class,
+            'scopes' => \App\Http\Middleware\CheckToken::class,
             //Custom Laravel\Passport\Http\Middleware\CheckTokenForAnyScope
             'scope' => \App\Http\Middleware\CheckTokenForAnyScope::class,
 
